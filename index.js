@@ -14,12 +14,6 @@ app.use(cors());
 app.use(express.json());
 
 
-
-// const mongoUrl = `mongodb+srv://${process.env.MONGO_USER_NAME}:${process.env.MONGO_PASSWORD}@organicfoodcluster.sphrf.mongodb.net/myFirstDatabase?retryWrites=true&w=majority`;
-
-// const client = new MongoClient(mongoUrl, { useNewUrlParser: true, useUnifiedTopology: true, serverApi: ServerApiVersion.v1 });
-
-
 const uri = `mongodb+srv://${process.env.MONGO_USER_NAME}:${process.env.MONGO_PASSWORD}@organicfoodcluster.sphrf.mongodb.net/myFirstDatabase?retryWrites=true&w=majority`;
 const client = new MongoClient(uri, { useNewUrlParser: true, useUnifiedTopology: true, serverApi: ServerApiVersion.v1 });
 
@@ -43,10 +37,7 @@ const run = async () => {
             const newItem = req.body;
             const insertNewItem = itemCollection.insertOne(newItem)
             res.send("item Added");
-
-
         })
-
 
 
         app.get(`${baseApiUrl}/items/:id`, async (req, res) => {
@@ -54,7 +45,37 @@ const run = async () => {
             const query = { _id: ObjectId(id) };
             const item = await itemCollection.findOne(query);
             res.send(item)
+        })
 
+        app.delete(`${baseApiUrl}/items/:id`, async (req, res) => {
+            const id = req.params.id;
+            const query = { _id: ObjectId(id) };
+            const item = await itemCollection.deleteOne(query);
+            res.send("Item Deleted")
+        })
+
+        app.put(`${baseApiUrl}/items/:id`, async (req, res) => {
+
+            const updatedItemId = req.params.id;
+            const updatedItem = req.body
+            const filter = { _id: ObjectId(id) }
+            const option = { upsert: false }
+            const updatedInfo = {
+                $set: {
+                    quantity: updatedItem.quantity
+                }
+            }
+            const result = await itemCollection.updateOne(filter, updatedInfo, option)
+            res.send("Item  Sold")
+
+        })
+
+        app.get(`${baseApiUrl}/myItems`, async (req, res) => {
+            const userEmail = req.query.email;
+            const query = { email: userEmail }
+            const cursor = await itemCollection.find({ query })
+            const result = cursor.toArray()
+            res.send(result);
         })
 
 
