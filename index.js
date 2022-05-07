@@ -57,16 +57,16 @@ const run = async () => {
         app.put(`${baseApiUrl}/items/:id`, async (req, res) => {
 
             const updatedItemId = req.params.id;
-            const updatedItem = req.body
-            const filter = { _id: ObjectId(id) }
+            const item = req.body
+            const filter = { _id: ObjectId(updatedItemId) }
             const option = { upsert: false }
             const updatedInfo = {
                 $set: {
-                    quantity: updatedItem.quantity
+                    quantity: item.quantity
                 }
             }
             const result = await itemCollection.updateOne(filter, updatedInfo, option)
-            res.send("Item  Sold")
+            res.send("Successful")
 
         })
 
