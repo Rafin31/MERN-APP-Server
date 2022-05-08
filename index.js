@@ -1,6 +1,8 @@
 const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
 const express = require('express');
+const jwt = require('jsonwebtoken');
 const cors = require('cors');
+const crypto = require('crypto')
 const { query } = require('express');
 const { send } = require('process');
 const port = process.env.PORT || 5000;
@@ -17,12 +19,27 @@ app.use(express.json());
 const uri = `mongodb+srv://${process.env.MONGO_USER_NAME}:${process.env.MONGO_PASSWORD}@organicfoodcluster.sphrf.mongodb.net/myFirstDatabase?retryWrites=true&w=majority`;
 const client = new MongoClient(uri, { useNewUrlParser: true, useUnifiedTopology: true, serverApi: ServerApiVersion.v1 });
 
+//JWT Token
+
+
+
+
 const run = async () => {
     try {
 
         await client.connect()
         const itemCollection = client.db("organicFood").collection("items")
         const baseApiUrl = '/organicFood';
+
+
+        app.post(`${baseApiUrl}/login`, async (req, res) => {
+            const user = req.body;
+            const accessToken = jwt.sign(user, process.env.ACCESS_TOKEN_SECRET, {
+                expiresIn: '1d'
+            });
+            res.send({ accessToken });
+            // res.send('Test')
+        })
 
 
         app.get(`${baseApiUrl}/items`, async (req, res) => {
@@ -70,13 +87,19 @@ const run = async () => {
 
         })
 
-        app.get(`${baseApiUrl}/myItems`, async (req, res) => {
+        app.get(`${baseApiUrl}/myItems`, jwtTokenVerify, async (req, res) => {
 
+            const decodedEmail = req.decoded.email;
             const userEmail = req.query.email;
-            const query = { authorEmail: userEmail }
-            const cursor = itemCollection.find(query)
-            const result = await cursor.toArray()
-            res.send(result);
+            if (decodedEmail) {
+                const query = { authorEmail: userEmail }
+                const cursor = itemCollection.find(query)
+                const result = await cursor.toArray()
+                res.send(result);
+            } else {
+                res.status(403).send({ message: 'forbidden access' })
+            }
+
         })
 
 
