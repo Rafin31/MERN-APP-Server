@@ -27,7 +27,7 @@ const run = async () => {
 
         app.get(`${baseApiUrl}/items`, async (req, res) => {
             const query = {}
-            const cursor = itemCollection.find(query);
+            const cursor = itemCollection.find(query).sort({ "_id": -1 });
             const items = await cursor.toArray()
             res.send(items)
         })
@@ -71,10 +71,11 @@ const run = async () => {
         })
 
         app.get(`${baseApiUrl}/myItems`, async (req, res) => {
+
             const userEmail = req.query.email;
-            const query = { email: userEmail }
-            const cursor = await itemCollection.find({ query })
-            const result = cursor.toArray()
+            const query = { authorEmail: userEmail }
+            const cursor = itemCollection.find(query)
+            const result = await cursor.toArray()
             res.send(result);
         })
 
