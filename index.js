@@ -16,7 +16,7 @@ app.use(cors());
 app.use(express.json());
 
 
-const uri = `mongodb+srv://${process.env.MONGO_USER_NAME}:${process.env.MONGO_PASSWORD}@organicfoodcluster.sphrf.mongodb.net/myFirstDatabase?retryWrites=true&w=majority`;
+const uri = `mongodb+srv://${process.env.MONGO_USER_NAME}:${process.env.MONGO_PASSWORD}@cluster0.w7dx664.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0`
 const client = new MongoClient(uri, { useNewUrlParser: true, useUnifiedTopology: true, serverApi: ServerApiVersion.v1 });
 
 //JWT Token
@@ -36,14 +36,12 @@ function jwtTokenVerify(req, res, next) {
     })
 }
 
-
-
 const run = async () => {
     try {
 
         await client.connect()
         const itemCollection = client.db("organicFood").collection("items")
-        const baseApiUrl = '/organicFood';
+        const baseApiUrl = '/api/v01';
 
 
         app.post(`${baseApiUrl}/login`, async (req, res) => {
@@ -65,8 +63,8 @@ const run = async () => {
 
         app.post(`${baseApiUrl}/items/addItems`, async (req, res) => {
 
-            const newItem = req.body;
-            const insertNewItem = itemCollection.insertOne(newItem)
+            // const newItem = req.body;
+            // const insertNewItem = itemCollection.insertOne(newItem)
             res.send("item Added");
         })
 
@@ -118,8 +116,8 @@ const run = async () => {
 
 
 
-        app.get('/', async (req, res) => {
-            res.send('This is express server')
+        app.get(`${baseApiUrl}/`, async (req, res) => {
+            res.status(200).json({ message: "This is express server", status: 201 })
         })
 
 
@@ -132,9 +130,6 @@ const run = async () => {
 }
 
 run().catch(console.dir)
-
-
-
 
 
 
